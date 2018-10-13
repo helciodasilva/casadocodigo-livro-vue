@@ -1,60 +1,87 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank">Twitter</a></li>
-    </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li><a href="http://router.vuejs.org/" target="_blank">vue-router</a></li>
-      <li><a href="http://vuex.vuejs.org/" target="_blank">vuex</a></li>
-      <li><a href="http://vue-loader.vuejs.org/" target="_blank">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank">awesome-vue</a></li>
-    </ul>
+    <!-- Exibindo o total -->
+    <p>{{ total }}</p>
+    <!-- Botões para contar, executa o método calcula com parâmetros diferentes -->
+    <button @click="calcula('-')">  - </button>
+    <button @click="calcula('+')">  + </button>
+
+    <!-- Exibe nome normal e nome com filtro formatado -->
+    <hr>
+    <p>Nome Iniciado: {{  nome  }}</p>
+    <p>Nome  Filtrado: {{  nome | formataNome }}</p>
+
+    <!-- Exibe o nome depois de passar pela propriedade computada, alé mde ter o input do nome -->
+    <hr>
+    <p>Nome Computado: {{ nomeFormatado }}</p>
+    <label>Input a computar</label>
+    <input v-model="nome" type="text">
+
+    <!-- Formulário de busca para observadores -->
+    <hr>
+    <input v-model="busca" type="text">
+    <p v-text="resultado"></p>
   </div>
 </template>
 
 <script>
 export default {
   name: 'app',
+  // Inicia as variaveis usadas
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      total: 10,
+      nome: 'jose antonio',
+      resultado: '',
+      busca: ''
     }
-  }
+  },
+  methods: {
+    // se sinal for - eñtão subtrai se nao soma, tudo no total
+    calcula( sinal ) {
+      this.total = (sinal == '-')
+        ? this.total - 1
+        : this.total + 1
+    },
+    // espera meio segundo, caso o texto ainda não mudou muda o resultado
+    recolheResposta() {
+      let valor = this.busca
+      setTimeout( () => {
+        if(valor == this.busca)
+          this.resultado = 'Terminou de digitar..'
+      }, 500)
+    }
+  },
+  filters: {
+    // alem de printar no console, coloca tudo em minusculo, corta no espaço e então pega cada palavra passando a primeira letra para maiusculo
+    formataNome( valor ) {
+      console.log('executando filter')
+      valor = valor.toLowerCase()
+      let corta = valor.split(' ')
+      let resultado = ''
+      for (let nome of corta)
+        resultado += nome.charAt(0).toUpperCase() + nome.slice(1) + ' '
+      return  resultado
+    }
+  },
+  computed: {
+    // passa todo o nome para maiusculo, para mudar o valor, pega somente os 4 primeiros caracteres
+    nomeFormatado: {
+      get: function () {
+        console.log('executando computed')
+        return this.nome.toUpperCase()
+      },
+      set: function (novoValor) {
+        this.nome = novoValor.substring(0, 3)
+      }
+    }
+  },
+  watch: {
+    // observa a variavel busca, mudando o resultado e executando o metodo de recolher
+    busca: function (novoValor, valorAntigo) {
+      this.resultado = 'Aguardando termino da digitação..'
+      this.recolheResposta()
+    }
+  },
 }
 </script>
-
-<style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-
-h1, h2 {
-  font-weight: normal;
-}
-
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-
-a {
-  color: #42b983;
-}
-</style>
